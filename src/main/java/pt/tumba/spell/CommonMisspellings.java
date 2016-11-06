@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
@@ -20,17 +21,11 @@ import java.util.zip.GZIPInputStream;
 */
 public final class CommonMisspellings {
 
-	/** The <code>File</code> path leading up to this dictionary. */
-	private String dictionaryFileName = null;
-
-	/** The <code>File</code> path leading up to the dictionary of correct spellings. */
-	private String dictionaryGoodFormsFileName = null;
-
 	/** The lookup table for the dictionary, storing badTerm<->goodTerm relations. */
 	private Map commonMisspellingIndex = null;
-
-    /** A <code>BloomFilter</code> containing correctly spelled words. */
-    private BloomFilter correctSpellings = null;
+	
+	/** A <code>BloomFilter</code> containing correctly spelled words. */
+	private BloomFilter correctSpellings = new BloomFilter(100000);
 
 	/**
 	 * Constructor for CommonMisspellings.
@@ -60,7 +55,10 @@ public final class CommonMisspellings {
 	 *                                  the file is a normal text document.
 	 */
 	public CommonMisspellings(String dictionaryFileName, boolean compression) throws Exception {
-		this(dictionaryFileName,null,compression);
+		try(InputStream dictionaryIn = openFile(dictionaryFileName, compression);
+				BufferedReader dictionaryReader = new BufferedReader(new InputStreamReader(dictionaryIn))) {
+			loadDictionaries(dictionaryReader, null);
+		}
 	}
 	
 	/**
@@ -72,18 +70,46 @@ public final class CommonMisspellings {
      *                                  the file is a normal text document.
 	 */
 	public CommonMisspellings(String dictionaryFileName, String dictionaryGoodFormsFileName, boolean compression) throws Exception {
-		this.dictionaryFileName = dictionaryFileName;
-		this.dictionaryGoodFormsFileName = dictionaryGoodFormsFileName;
+		try(InputStream dictionaryIn = openFile(dictionaryFileName, compression);
+				InputStream goodFormsIn = openFile(dictionaryGoodFormsFileName, compression);
+				BufferedReader dictionaryReader = new BufferedReader(new InputStreamReader(dictionaryIn));
+				BufferedReader goodFormsReader = new BufferedReader(new InputStreamReader(goodFormsIn))) {
+			loadDictionaries(dictionaryReader, goodFormsReader);
+		}
+        }
+
+	/**
+	 * Constructor for CommonMisspellings to load the dictionaries from an existing Reader.
+	 *
+	 * @param dictionary a <code>Reader</code> reading the dictionary.
+	 * @param goodForms a <code>Reader</code> for the dictionary of correct spellings.
+	 */
+	public CommonMisspellings(Reader dictionary, Reader goodForms) throws Exception {
+		loadDictionaries(dictionary, goodForms);
+	}
+
+	/**
+	 * Obtain a stream reading from the specified file, possibly GZIP compressed.
+	 */
+	protected InputStream openFile(String filename, boolean compression) throws Exception {
+		InputStream stream = new FileInputStream(filename);
+		if(compression) {
+			stream = new GZIPInputStream(stream);
+		}
+		return stream;
+	}
+
+	/**
+	 * Load the dictionaries.
+	 *
+	 * @param dictionary a <code>Reader</code> reading the dictionary.
+	 * @param goodForms a <code>Reader</code> for the dictionary of correct spellings.
+	 */
+	protected void loadDictionaries(Reader dictionary, Reader goodForms) throws Exception {
 		this.commonMisspellingIndex = new HashMap();
-		this.correctSpellings = new BloomFilter(100000);
-		Reader aux;
-		if(compression) aux = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(dictionaryFileName))));
-		else aux = new FileReader((new File(dictionaryFileName)));
-		index(aux);
-		if (dictionaryGoodFormsFileName!=null) {
-			if(compression) aux = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(dictionaryGoodFormsFileName))));
-			else aux = new FileReader((new File(dictionaryGoodFormsFileName)));
-			indexCorrectSpellings(aux);
+		index(dictionary);
+		if (goodForms!=null) {
+			indexCorrectSpellings(goodForms);
 		}
 	}
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Vector;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Iterator;
 
 /**
@@ -93,6 +94,16 @@ public class SpellChecker {
 	/**
 	 * Reads the dictionary to memory.
 	 * 
+	 *@param dictionaryReader  a <code>Reader</code> reading from the dictionary.
+	 * @throws Exception an Exception indicating if any problem occured while reading the dictionary.
+	 */
+	public synchronized void initialize(Reader dictionaryReader) throws Exception {
+			dictionary = new TernarySearchTrie(dictionaryReader);
+	}
+
+	/**
+	 * Reads the dictionary to memory.
+	 * 
 	 *@param path1  The <code>File</code> path leading up to the dictionary.
 	 *@param path2  The <code>File</code> path leading up to a dictionary of common misspellings.
 	 * @throws Exception an Exception indicating if any problem occured while reading the dictionary.
@@ -100,6 +111,17 @@ public class SpellChecker {
 	public synchronized void initialize(String path1, String path2) throws Exception {
 			dictionary = new TernarySearchTrie(new File(path1));
 			if(path2!=null) commonErrors = new CommonMisspellings(path2);
+	}
+
+	/**
+	 * Reads the dictionary to memory.
+	 * 
+	 *@param dictionaryReader a <code>Reader</code> reading from the dictionary file.
+	 *@param misspellingsReader  a <code>Reader</code> reading from a dictionary of common misspellings.
+	 * @throws Exception an Exception indicating if any problem occured while reading the dictionary.
+	 */
+	public synchronized void initialize(Reader dictionaryReader, Reader misspellingsReader) throws Exception {
+			initialize(dictionaryReader, misspellingsReader, null);
 	}
 
 	/**
@@ -113,6 +135,19 @@ public class SpellChecker {
 	public synchronized void initialize(String path1, String path2, String path3) throws Exception {
 			dictionary = new TernarySearchTrie(new File(path1));
 			if(path2!=null) commonErrors = new CommonMisspellings(path2,path3);
+	}
+
+	/**
+	 * Reads the dictionary to memory.
+	 * 
+	 *@param dictionaryReader  a <code>Reader</code> reading from the dictionary file.
+	 *@param misspellingsReader a <code>Reader</code> reading from a dictionary of common misspellings.
+	 *@param correctReader a <code>Reader</code> reading from a dictionary of correct spellings.
+	 * @throws Exception an Exception indicating if any problem occured while reading the dictionary.
+	 */
+	public synchronized void initialize(Reader dictionaryReader, Reader misspellingsReader, Reader correctReader) throws Exception {
+			dictionary = new TernarySearchTrie(dictionaryReader);
+			if(misspellingsReader!=null) commonErrors = new CommonMisspellings(misspellingsReader, correctReader);
 	}
 
 	/**

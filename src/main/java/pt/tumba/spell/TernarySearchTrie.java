@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -132,10 +134,27 @@ public class TernarySearchTrie {
 	 *@exception  IOException  A problem occured while reading the data.
 	 */
 	public TernarySearchTrie(File file, boolean compression) throws IOException {
-		this();
-		BufferedReader in;
-		if(compression) in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
-		else in = new BufferedReader(new InputStreamReader((new FileInputStream(file))));
+		try(InputStream stream = openFile(file, compression);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+			loadDictionary(reader);
+		}
+	}
+
+	/**
+	 *  Constructs a Ternary Search Trie and loads data from a <code>Reader</code> into the Trie. 
+	 *  The file is a normal text document, where each line is of the form " word : integer".
+	 *
+	 *@param  reader              The source of data to load into the Trie.
+	 *@exception  IOException  A problem occured while reading the data.
+	 */
+	public TernarySearchTrie(Reader reader) throws IOException {
+		loadDictionary(new BufferedReader(reader));
+	}
+
+	/**
+	 * Load the dictionary from the specified <code>Reader</code>.
+	 */
+	protected void loadDictionary(BufferedReader in) throws IOException {
 		String word;
 		int pos;
 		int occur;
@@ -189,9 +208,18 @@ public class TernarySearchTrie {
 				currentNode.data = new Integer(occur);
 			}
 		}
-		in.close();
 	}
 
+	/**
+	 * Obtain a stream reading from the specified file, possibly GZIP compressed.
+	 */
+	protected InputStream openFile(File file, boolean compression) throws IOException {
+		InputStream stream = new FileInputStream(file);
+		if(compression) {
+			stream = new GZIPInputStream(stream);
+		}
+		return stream;
+	}
 	/**
 	 *  Deletes the node passed in as an argument. If this node
 	 *  has non-null data, then both the node and the data will be deleted. It also
