@@ -21,3 +21,15 @@ This fork fixes these problems by allowing the caller to pass in their own
 As with the original JaSpell library, this version is released under a 2-clause
 BSD licence.
 
+Getting the library
+-------------------
+
+Binaries are available for download from
+https://github.com/GateNLP/jaspell/releases, and release versions are available
+in the Central Repository under the `uk.ac.gate` group ID
+
+    <dependency>
+      <groupId>uk.ac.gate</groupId>
+      <artifactId>jaspell</artifactId>
+      <version>0.3.1</version>
+    </dependency>
