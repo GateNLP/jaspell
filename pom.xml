@@ -8,7 +8,12 @@
   <version>0.3.1</version>
   <packaging>jar</packaging>
   <name>JaSpell Java Spell Checker (GATE version)</name>
-  <url>https://gate.ac.uk</url>
+  <description>
+    Java Spell Checker library, originally developed by Bruno
+    Martins (http://jaspell.sourceforge.net) with modifications by Ian
+    Roberts
+  </description>
+  <url>https://github.com/GateNLP/jaspell</url>
 
   <distributionManagement>
     <repository>
@@ -102,4 +107,25 @@
       </build>
     </profile>
   </profiles>
+
+
+  <developers>
+    <developer>
+      <id>gate-team</id>
+      <name>GATE Team</name>
+      <email>gate-developers@lists.sourceforge.net</email>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>bsd_2</name>
+      <url>https://github.com/GateNLP/jaspell/blob/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/GateNLP/jaspell</url>
+    <connection>scm:git:git://github.com/GateNLP/jaspell.git</connection>
+    <developerConnection>scm:git:git@github.com:GateNLP/jaspell.git</developerConnection>
+  </scm>
 </project>
